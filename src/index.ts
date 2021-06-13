@@ -15,7 +15,7 @@ global.getSlackChannels = async (): Promise<void> => {
 
   await Promise.all(channels.map( async (channel) => {
     const messages = await slack.getSlackMessagesWithin24hours(channel.id)
-    return { channel: channel.id, messages }
+    return { channel: channel.name, messages }
   })).then(async (channelMessages) => {
     await Promise.all(channelMessages.map( async (channelMessage) => {
       if(channelMessage.messages.length > 0) {
@@ -27,7 +27,7 @@ global.getSlackChannels = async (): Promise<void> => {
               channel: channelMessage.channel,
               post_by: convertUserIdToDisplayName(users, message.user),
               text: message.text,
-              thread_ts: message.thread_ts ? message.thread_ts : null,
+              thread_ts: message.thread_ts ? message.thread_ts : '',
             })
           }
         })
