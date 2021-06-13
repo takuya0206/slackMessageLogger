@@ -66,7 +66,7 @@ global.logSlackMessages = async (): Promise<void> => {
     if(!messageSheet){
       messageSheet = ss.insertSheet(outputSpreadsheetInfo.messageSheet)
       messageSheet = ss.getSheetByName(outputSpreadsheetInfo.messageSheet)
-      messageSheet.deleteColumns(loggingMessageInAry.length, messageSheet.getMaxColumns()-loggingMessageInAry.length)
+      messageSheet.deleteColumns(loggingMessageInAry[0].length, messageSheet.getMaxColumns()-loggingMessageInAry[0].length)
     } else {
       // when there is existing data, delete header and add below
       loggingMessageInAry.shift()
@@ -81,7 +81,7 @@ global.logSlackMessages = async (): Promise<void> => {
     if(!mentionSheet){
       mentionSheet = ss.insertSheet(outputSpreadsheetInfo.mentionSheet)
       mentionSheet = ss.getSheetByName(outputSpreadsheetInfo.mentionSheet)
-      mentionSheet.deleteColumns(loggingMentionInAry.length, mentionSheet.getMaxColumns()-loggingMentionInAry.length)
+      mentionSheet.deleteColumns(loggingMentionInAry[0].length, mentionSheet.getMaxColumns()-loggingMentionInAry[0].length)
     } else {
       // when there is existing data, delete header and add below
       loggingMentionInAry.shift()
