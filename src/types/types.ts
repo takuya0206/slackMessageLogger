@@ -30,4 +30,14 @@ export interface slackMessageProp {
   reply_count?: number;
   reply_users_count?: number;
   reply_users?: string[];
+  bot_id?: string;
+}
+
+export interface loggingMessageProp {
+  ts: string;
+  post_at: string;
+  channel: string;
+  post_by: string;
+  text: string;
+  thread_ts: string | null;
 }
