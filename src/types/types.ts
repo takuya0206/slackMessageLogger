@@ -12,3 +12,22 @@ export interface slackUserProp {
     display_name: string;
   };
 }
+
+// https://api.slack.com/events/message
+// defined only necessary properties
+export interface slackMessageProp {
+  type: string;
+  subtype?: string;
+  text: string;
+  user: string;
+  ts: string;
+  reactions?: {
+    name: string;
+    users: string[];
+    count: number;
+  }[];
+  thread_ts?: string;
+  reply_count?: number;
+  reply_users_count?: number;
+  reply_users?: string[];
+}

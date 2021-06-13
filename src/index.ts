@@ -7,5 +7,5 @@ declare let global: any;
 global.getSlackChannels = async (): Promise<void> => {
   const p = new Properties();
   const slack = new Slack(p.getSlackToken())
-  console.log(await slack.getAllSlackUsers())
+  console.log(await slack.getSlackMessagesWithin24hours('C06B7BD34'))
 };

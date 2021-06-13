@@ -1,6 +1,12 @@
 {
   "timeZone": "Asia/Tokyo",
   "dependencies": {
+    "libraries": [
+      {
+        "userSymbol": "dayjs",
+        "libraryId": "1ShsRhHc8tgPy5wGOzUvgEhOedJUQD53m-gd8lG2MOgs-dXC_aCZn9lFB",
+        "version": "1"
+      }]
   },
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8"
