@@ -41,3 +41,7 @@ export interface loggingMessageProp {
   text: string;
   thread_ts: string | null;
 }
+
+export interface loggingMentionProp extends loggingMessageProp {
+  toWhom: string;
+}

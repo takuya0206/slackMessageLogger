@@ -16,6 +16,7 @@ dist/
 
 # Envrioment
 .clasp.json
+constants.ts
 
 # Other
 .DS_Store

@@ -13,14 +13,30 @@ export const getTalkToWhom = (text: string): string[] => {
   }
 };
 
-export const convertUserIdToDisplayName = (
+export const convertUserIdToName = async (
   users: slackUserProp[],
   userId: string
-): string | null => {
-  const displayName = users.filter((user) => {
+): Promise<string | null> => {
+  let name = null;
+  users.forEach(async (user) => {
     if (user.id === userId) {
-      return user.profile.display_name;
+      name = user.profile.real_name;
     }
   });
-  return displayName.length > 0 ? displayName[0].profile.display_name : null;
+  return name;
+};
+
+// convert [{}, {}]  to [[], []]
+export const convertAryObjToMultiAry = (AryObj: { [key: string]: any }[]): unknown[][] => {
+  const result: unknown[][] = [];
+  const keys = Object.keys(AryObj[0]);
+  result.push(keys); // keys should be header for spreadsheet
+  AryObj.forEach((obj) => {
+    const ary = [];
+    keys.forEach((key) => {
+      ary.push(obj[key]);
+    });
+    result.push(ary);
+  });
+  return result;
 };

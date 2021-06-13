@@ -1,4 +1,4 @@
-import { getTalkToWhom, convertUserIdToDisplayName } from '../app/util';
+import { getTalkToWhom, convertUserIdToName, convertAryObjToMultiAry } from '../app/util';
 jest.unmock('../app/util');
 
 describe('util', () => {
@@ -13,7 +13,7 @@ describe('util', () => {
     });
   });
 
-  describe('convertSlackIdToDisplayName()', () => {
+  describe('convertSlackIdToName()', () => {
     const parameter = [
       {
         id: 'test',
@@ -25,11 +25,30 @@ describe('util', () => {
         },
       },
     ];
-    it('no match', () => {
-      expect(convertUserIdToDisplayName(parameter, 'no match')).toStrictEqual(null);
+    it('no match', async () => {
+      return convertUserIdToName(parameter, 'no match').then((data) =>
+        expect(data).toStrictEqual(null)
+      );
     });
-    it('match', () => {
-      expect(convertUserIdToDisplayName(parameter, 'test')).toStrictEqual('test');
+    it('match', async () => {
+      return convertUserIdToName(parameter, 'test').then((data) =>
+        expect(data).toStrictEqual('test')
+      );
+    });
+  });
+
+  describe('convertAryObjToMultiAry()', () => {
+    it('with the correct parameter', () => {
+      const parameter = [
+        { key1: 'value1', key2: 'value2' },
+        { key1: 'value3', key2: 'value4' },
+      ];
+      const expected = [
+        ['key1', 'key2'],
+        ['value1', 'value2'],
+        ['value3', 'value4'],
+      ];
+      expect(convertAryObjToMultiAry(parameter)).toStrictEqual(expected);
     });
   });
 });
