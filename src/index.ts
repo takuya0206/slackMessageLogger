@@ -9,7 +9,7 @@ import { outputSpreadsheetInfo } from './app/constants'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare let global: any;
 
-global.getSlackChannels = async (): Promise<void> => {
+global.logSlackMessages = async (): Promise<void> => {
   const p = new Properties();
   const ss: Spreadsheet.Spreadsheet = SpreadsheetApp.openById(outputSpreadsheetInfo.id);
   const slack = new Slack(p.getSlackToken())
@@ -60,19 +60,19 @@ global.getSlackChannels = async (): Promise<void> => {
         })
       }
     }))
-    console.log(loggingMessage)
-    console.log(loggingMention)
     const loggingMessageInAry = convertAryObjToMultiAry(loggingMessage)
     let messageSheet = ss.getSheetByName(outputSpreadsheetInfo.messageSheet)
     let messageSheetStartRow: number = 1
     if(!messageSheet){
       messageSheet = ss.insertSheet(outputSpreadsheetInfo.messageSheet)
       messageSheet = ss.getSheetByName(outputSpreadsheetInfo.messageSheet)
+      messageSheet.deleteColumns(loggingMessageInAry.length+1, messageSheet.getMaxColumns()-loggingMessageInAry.length+1)
     } else {
       // when there is existing data, delete header and add below
       loggingMessageInAry.shift()
       messageSheetStartRow = messageSheet.getLastRow() + 1
     }
+
     messageSheet.getRange(messageSheetStartRow, 1, loggingMessageInAry.length, loggingMessageInAry[0].length).setValues(loggingMessageInAry)
 
     const loggingMentionInAry = convertAryObjToMultiAry(loggingMention)
@@ -81,6 +81,7 @@ global.getSlackChannels = async (): Promise<void> => {
     if(!mentionSheet){
       mentionSheet = ss.insertSheet(outputSpreadsheetInfo.mentionSheet)
       mentionSheet = ss.getSheetByName(outputSpreadsheetInfo.mentionSheet)
+      mentionSheet.deleteColumns(loggingMentionInAry.length+1, mentionSheet.getMaxColumns()-loggingMentionInAry.length+1)
     } else {
       // when there is existing data, delete header and add below
       loggingMentionInAry.shift()
