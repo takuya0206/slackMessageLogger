@@ -2,7 +2,7 @@
 This is a tool for logging slack messages with Google Spreadsheet in order to allow you to analyze communication in the workplace.
 
 ## What You Can Do
-By using this, you can analyze communication in your Slack workspace such as how active each channel is, who is mentioned the most, a member mentions who the most etc. For example, you can utilize it to know how onboarding is going well.
+By using this, you can analyze communication in your Slack workspace such as how active each channel is, who is mentioned the most, whom a member mentions, etc. For example, you can utilize it to know how onboarding is going well.
 
 ### Output in Google Spreadsheet
 #### message sheet
@@ -99,7 +99,7 @@ clasp push
 
 ### Run
 #### Set a time-based trigger
-Set a time-based trigger for the function `logSlackMessages`, which should be everyday. This program is designed to log messages within 24 hours before.
+Set a time-based trigger for the function named as `logSlackMessages`, which should be run everyday. This program is designed to log messages within 24 hours before.
 
 #### Manual way (optional)
 If you want previous logs, change the following code in `src/app/slack.service.ts` and specify how long before you want. Then, manually run `logSlackMessages`.
