@@ -85,8 +85,9 @@ global.logSlackMessages = async (): Promise<void> => {
         })
       }
     }))
-    // TODO: if there is no message, error happens
-    const loggingMessageInAry = convertAryObjToMultiAry(loggingMessage)
+
+    if(loggingMessage.length !== 0) {
+      const loggingMessageInAry = convertAryObjToMultiAry(loggingMessage)
     let messageSheet = ss.getSheetByName(outputSpreadsheetInfo.messageSheet)
     let messageSheetStartRow: number = 1
     if(!messageSheet){
@@ -98,10 +99,13 @@ global.logSlackMessages = async (): Promise<void> => {
       loggingMessageInAry.shift()
       messageSheetStartRow = messageSheet.getLastRow() + 1
     }
-
     messageSheet.getRange(messageSheetStartRow, 1, loggingMessageInAry.length, loggingMessageInAry[0].length).setValues(loggingMessageInAry)
+    } else {
+      console.log('There is no message.')
+    }
 
-    const loggingMentionInAry = convertAryObjToMultiAry(loggingMention)
+    if(loggingMention.length !== 0) {
+      const loggingMentionInAry = convertAryObjToMultiAry(loggingMention)
     let mentionSheet = ss.getSheetByName(outputSpreadsheetInfo.mentionSheet)
     let mentionSheetStartRow: number = 1
     if(!mentionSheet){
@@ -114,7 +118,8 @@ global.logSlackMessages = async (): Promise<void> => {
       mentionSheetStartRow = mentionSheet.getLastRow() + 1
     }
     mentionSheet.getRange(mentionSheetStartRow, 1, loggingMentionInAry.length, loggingMentionInAry[0].length).setValues(loggingMentionInAry)
-
-
+    } else {
+      console.log('There is no mention.')
+    }
   })
 };
