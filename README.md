@@ -2,26 +2,24 @@
 This is a tool for logging slack messages with Google Spreadsheet in order to allow you to analyze communication in the workplace.
 
 ## What You Can Do
-By using this, you can analyze communication in your Slack workspace such as how active each channel is, who is mentioned the most, whom a member mentions, etc. For example, you can utilize it to know how onboarding is going well.
+By using this, you can analyze communication in your Slack workspace such as how active each channel is, who is mentioned the most, whom a member mentions, etc. For example, you can utilize it for knowing how onboarding is going well.
 
 ### Output in Google Spreadsheet
 #### message sheet
-|  ts  |  post_at |   channel  |  post_by  |   text  |  thread_ts  |
-| ---- | ---- | ---- | ---- | ---- | ---- |
-|  946652400  |  2000-01-01  |  general  |  Takuya  |  This is a test.  |    |
+![message_sheet.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/147086/e86dd10b-dd5d-d423-5ef6-2ab637e0b866.png)
 
 Every message in public channels in your Slack workspace is logged in the message sheet
 
 #### mention sheet
-
-|  ts  |  post_at |   channel  |  post_by  |   text  |  thread_ts  | toWhom |
-| ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-|  946652400  |  2000-01-01  |  general  |  Takuya  |  <@SAMPLE> Hi, This is a test.  |    | Tokiwa |
+![mention_sheet.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/147086/2a464e32-d082-b62e-028f-49dc50257b6a.png)
 
 By contrast to the message sheet, only messages which mention someone are logged in the mention sheet. If a message mentions more than one person, the record is logged separate rows, which means when you mention two people, the number of rows is two.
 
 ### How to Utilize
 The easiest way of analyzing is using pivot table in Google Spreadsheet. However I recommend that you use [Google Data Studio](https://support.google.com/datastudio/answer/6283323?hl=en). You can visualize your data and easily know what is going on in your Slack workspace.
+The following picture is an example for Google Data Studio, which visualizes the number of posts in each channel. 
+
+![example_dataportal.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/147086/be66373e-87e3-260e-22be-692e32a7df5a.png)
 
 ## Prerequisites
 - Node.js
@@ -58,20 +56,8 @@ Where you can find Google spreadsheet id? https://developers.google.com/sheets/a
 }
 ```
 #### Store your Slack token in ScriptProperties.
-The key must be the same as the following.
-```
-export class Properties {
-  private SLACK_TOKEN: string;
-
-  constructor() {
-    this.SLACK_TOKEN = PropertiesService.getScriptProperties().getProperty('SLACK_TOKEN');
-  }
-  getSlackToken(): string {
-    return this.SLACK_TOKEN;
-  }
-}
-```
-How to get a Slack token? https://api.slack.com/authentication/basics
+Firstly, you get Slack token. How to get a Slack token? https://api.slack.com/authentication/basics  
+Next, you store the Slack token in your Google Apps Script project by using ScriptProperties. The key must be the same as the one in this repository, i.e. `SLACK_TOKEN`. How to store data? https://developers.google.com/apps-script/guides/properties#saving_data
 
 #### Open src/appsscript.json, change timeZone (optional)
 ```
@@ -99,7 +85,7 @@ clasp push
 
 ### Run
 #### Set a time-based trigger
-Set a time-based trigger for the function named as `logSlackMessages`, which should be run everyday. This program is designed to log messages within 24 hours before.
+Set a time-based trigger for the function named as `logSlackMessages`, which should be run everyday. **This software is designed to log messages within 24 hours before**.
 
 #### Manual way (optional)
 If you want previous logs, change the following code in `src/app/slack.service.ts` and specify how long before you want. Then, manually run `logSlackMessages`.
