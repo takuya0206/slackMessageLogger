@@ -44,10 +44,26 @@ global.logSlackMessages = async (): Promise<void> => {
   const loggingMention: loggingMentionProp[] = []
 
   await Promise.all(channels.map( async (channel) => {
-    Utilities.sleep(100)
     const messages = await slack.getSlackMessagesWithin24hours(channel.id)
-    return { channel: channel.name, messages }
+    return { channelId: channel.id, channelName: channel.name, messages}
   })).then(async (channelMessages) => {
+    await Promise.all(channelMessages.map( async (channelMessage, index) => {
+      if(channelMessage.messages.length > 0) {
+        let allReplies = []
+        await Promise.all(channelMessage.messages.map(async (message) => {
+          if(message.reply_count > 0) {
+            const replies = await slack.getAllSlackReplies(channelMessage.channelId, message.ts)
+            replies.shift()
+            allReplies = allReplies.concat(replies)
+          }
+        }))
+        console.log(allReplies)
+        channelMessages[index].messages = channelMessages[index].messages.concat(allReplies)
+      }
+    }))
+    return channelMessages
+
+  }).then(async (channelMessages) => {
     await Promise.all(channelMessages.map( async (channelMessage) => {
       if(channelMessage.messages.length > 0) {
         channelMessage.messages.map(async (message) => {
@@ -58,7 +74,7 @@ global.logSlackMessages = async (): Promise<void> => {
             loggingMessage.push({
               ts: message.ts,
               post_at,
-              channel: channelMessage.channel,
+              channel: channelMessage.channelName,
               post_by,
               text: message.text,
               thread_ts,
@@ -73,7 +89,7 @@ global.logSlackMessages = async (): Promise<void> => {
                 loggingMention.push({
                   ts: message.ts,
                   post_at,
-                  channel: channelMessage.channel,
+                  channel: channelMessage.channelName,
                   post_by,
                   text: message.text,
                   thread_ts,
