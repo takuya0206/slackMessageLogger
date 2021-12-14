@@ -39,7 +39,7 @@ export interface loggingMessageProp {
   channel: string;
   post_by: string;
   text: string;
-  thread_ts: string | null;
+  type: 'message' | 'reply';
 }
 
 export interface loggingMentionProp extends loggingMessageProp {
