@@ -65,14 +65,14 @@ global.logSlackMessages = async (): Promise<void> => {
             const post_at = dayjs.dayjs(parseInt(message.ts) * 1000)
             if(targetDate.isAfter(post_at, 'day') || targetDate.isSame(post_at, 'day')){
               const post_by = await convertUserIdToName(users, message.user)
-              const thread_ts = message.thread_ts ? message.thread_ts : ''
+              const type = message.reply_count ? 'reply' : 'message'
               loggingMessage.push({
                 ts: message.ts,
                 post_at: post_at.format('YYYY/MM/DD'),
                 channel: channelMessage.channelName,
                 post_by,
                 text: message.text,
-                thread_ts,
+                type,
               })
               // log messages with each user whom someone mentions
               const talkToWhoms = getTalkToWhom(message.text)
@@ -87,7 +87,7 @@ global.logSlackMessages = async (): Promise<void> => {
                     channel: channelMessage.channelName,
                     post_by,
                     text: message.text,
-                    thread_ts,
+                    type,
                     toWhom,
                   })
                 }
