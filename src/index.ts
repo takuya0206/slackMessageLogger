@@ -46,14 +46,18 @@ global.logSlackMessages = async (): Promise<void> => {
   const loggingMention: loggingMentionProp[] = []
 
   await Promise.all(channels.map( async (channel) => {
+    Utilities.sleep(1500) // Because conversations which has Tier 3 limit can be called 50 times per minute. https://api.slack.com/docs/rate-limits
     const messages = await slack.getSlackMessagesFromSpecificDate(channel.id, searchOldestDate)
     let allReplies = []
     await Promise.all(messages.map(async (message) => {
-      if(message.reply_count > 0) {
+      // In case, need to specify range
+      // const post_at = dayjs.dayjs(parseInt(message.ts) * 1000)
+      // if(message.reply_count > 0 && dayjs.dayjs('').isAfter(post_at, 'day'))
+      if(message.reply_count > 0 ) {
+        Utilities.sleep(1500) // Because conversations which has Tier 3 limit can be called 50 times per minute. https://api.slack.com/docs/rate-limits
         const replies = await slack.getAllSlackReplies(channel.id, message.ts)
         replies.shift() // Because reply array include messages which create its threads
         allReplies = allReplies.concat(replies)
-        Utilities.sleep(1500) // Because conversation.list which has Tier 3 limit can be called 50 times per minute. https://api.slack.com/docs/rate-limits
       }
     }))
     return { channelName: channel.name, messages: messages.concat(allReplies)}
@@ -63,7 +67,7 @@ global.logSlackMessages = async (): Promise<void> => {
         channelMessage.messages.map(async (message) => {
           if(!message.subtype && !message.bot_id){
             const post_at = dayjs.dayjs(parseInt(message.ts) * 1000)
-            if(targetDate.isAfter(post_at, 'day') || targetDate.isSame(post_at, 'day')){
+            if(targetDate.isBefore(post_at, 'day') || targetDate.isSame(post_at, 'day')){ // true when targetDate is 2000-01-01 and post_at is 2000-01-02
               const post_by = await convertUserIdToName(users, message.user)
               const type = message.reply_count ? 'reply' : 'message'
               loggingMessage.push({
