@@ -84,4 +84,32 @@ export class Slack {
       return result;
     }
   }
+
+  async getAllSlackReplies(
+    channel: string,
+    ts: string,
+    pagination = ''
+  ): Promise<slackMessageProp[]> {
+    let isNextCursor = true;
+    let result = [];
+    try {
+      while (isNextCursor) {
+        const res = UrlFetchApp.fetch(
+          `${this.slackAPIURL}/conversations.replies?token=${this.slackToken}&channel=${channel}&ts=${ts}&limit=200&pretty=1${pagination}`
+        );
+        const resInParse = JSON.parse(res.getContentText());
+        result = result.concat(resInParse.messages);
+        if (resInParse.has_more) {
+          pagination = `&cursor=${resInParse.response_metadata.next_cursor}`;
+          Utilities.sleep(100);
+        } else {
+          isNextCursor = false;
+        }
+      }
+      return result;
+    } catch (e) {
+      console.error(`Failed getting slack replies -> ${e}`);
+      return result;
+    }
+  }
 }
