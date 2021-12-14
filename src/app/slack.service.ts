@@ -19,7 +19,7 @@ export class Slack {
         );
         const resInParse = JSON.parse(res.getContentText());
         result = result.concat(resInParse.channels);
-        if (resInParse.has_more) {
+        if (resInParse.response_metadata && resInParse.response_metadata.next_cursor) {
           pagination = `&cursor=${resInParse.response_metadata.next_cursor}`;
           Utilities.sleep(100);
         } else {
@@ -43,7 +43,7 @@ export class Slack {
         );
         const resInParse = JSON.parse(res.getContentText());
         result = result.concat(resInParse.members);
-        if (resInParse.has_more) {
+        if (resInParse.response_metadata && resInParse.response_metadata.next_cursor) {
           pagination = `&cursor=${resInParse.response_metadata.next_cursor}`;
           Utilities.sleep(100);
         } else {
@@ -57,21 +57,22 @@ export class Slack {
     }
   }
 
-  async getSlackMessagesWithin24hours(
+  async getSlackMessagesFromSpecificDate(
     channel: string,
+    dateInDayjs: dayjs.Dayjs,
     pagination = ''
   ): Promise<slackMessageProp[]> {
-    const yesterday = dayjs.dayjs().subtract(1, 'day').unix();
+    const oldest = dateInDayjs.unix();
     let isNextCursor = true;
     let result = [];
     try {
       while (isNextCursor) {
         const res = UrlFetchApp.fetch(
-          `${this.slackAPIURL}/conversations.history?token=${this.slackToken}&channel=${channel}&oldest=${yesterday}&limit=200&pretty=1${pagination}`
+          `${this.slackAPIURL}/conversations.history?token=${this.slackToken}&channel=${channel}&oldest=${oldest}&limit=200&pretty=1${pagination}`
         );
         const resInParse = JSON.parse(res.getContentText());
         result = result.concat(resInParse.messages);
-        if (resInParse.has_more) {
+        if (resInParse.response_metadata && resInParse.response_metadata.next_cursor) {
           pagination = `&cursor=${resInParse.response_metadata.next_cursor}`;
           Utilities.sleep(100);
         } else {
@@ -99,7 +100,7 @@ export class Slack {
         );
         const resInParse = JSON.parse(res.getContentText());
         result = result.concat(resInParse.messages);
-        if (resInParse.has_more) {
+        if (resInParse.response_metadata && resInParse.response_metadata.next_cursor) {
           pagination = `&cursor=${resInParse.response_metadata.next_cursor}`;
           Utilities.sleep(100);
         } else {

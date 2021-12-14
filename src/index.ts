@@ -40,17 +40,20 @@ global.logSlackMessages = async (): Promise<void> => {
   const slack = new Slack(p.getSlackToken())
   const users = await slack.getAllSlackUsers()
   const channels = await slack.getAllSlackChannels()
+  const targetDate = dayjs.dayjs().subtract(1, 'day') // assuming that trigger in GAS will set every day
+  const searchOldestDate = targetDate.subtract(2, 'week') // In order to find messages in threads, prepare some buffers. This is for messages in threads which are created on older date than target date
   const loggingMessage: loggingMessageProp[] = []
   const loggingMention: loggingMentionProp[] = []
 
   await Promise.all(channels.map( async (channel) => {
-    const messages = await slack.getSlackMessagesWithin24hours(channel.id)
+    const messages = await slack.getSlackMessagesFromSpecificDate(channel.id, searchOldestDate)
     let allReplies = []
     await Promise.all(messages.map(async (message) => {
       if(message.reply_count > 0) {
         const replies = await slack.getAllSlackReplies(channel.id, message.ts)
         replies.shift() // Because reply array include messages which create its threads
         allReplies = allReplies.concat(replies)
+        Utilities.sleep(1500) // Because conversation.list which has Tier 3 limit can be called 50 times per minute. https://api.slack.com/docs/rate-limits
       }
     }))
     return { channelName: channel.name, messages: messages.concat(allReplies)}
@@ -59,35 +62,37 @@ global.logSlackMessages = async (): Promise<void> => {
       if(channelMessage.messages.length > 0) {
         channelMessage.messages.map(async (message) => {
           if(!message.subtype && !message.bot_id){
-            const post_at = dayjs.dayjs(parseInt(message.ts) * 1000).format('YYYY-MM-DD')
-            const post_by = await convertUserIdToName(users, message.user)
-            const thread_ts = message.thread_ts ? message.thread_ts : ''
-            loggingMessage.push({
-              ts: message.ts,
-              post_at,
-              channel: channelMessage.channelName,
-              post_by,
-              text: message.text,
-              thread_ts,
-            })
-            // log messages with each user whom someone mentions
-            const talkToWhoms = getTalkToWhom(message.text)
-            talkToWhoms.map( async (talkToWhom) => {
-              const toWhom = await convertUserIdToName(users, talkToWhom)
-              if(!toWhom){
-                console.log(`Error: ${talkToWhom} doesn't exist in our user list.`)
-              } else {
-                loggingMention.push({
-                  ts: message.ts,
-                  post_at,
-                  channel: channelMessage.channelName,
-                  post_by,
-                  text: message.text,
-                  thread_ts,
-                  toWhom,
-                })
-              }
-            })
+            const post_at = dayjs.dayjs(parseInt(message.ts) * 1000)
+            if(targetDate.isAfter(post_at, 'day') || targetDate.isSame(post_at, 'day')){
+              const post_by = await convertUserIdToName(users, message.user)
+              const thread_ts = message.thread_ts ? message.thread_ts : ''
+              loggingMessage.push({
+                ts: message.ts,
+                post_at: post_at.format('YYYY/MM/DD'),
+                channel: channelMessage.channelName,
+                post_by,
+                text: message.text,
+                thread_ts,
+              })
+              // log messages with each user whom someone mentions
+              const talkToWhoms = getTalkToWhom(message.text)
+              talkToWhoms.map( async (talkToWhom) => {
+                const toWhom = await convertUserIdToName(users, talkToWhom)
+                if(!toWhom){
+                  console.log(`Error: ${talkToWhom} doesn't exist in our user list.`)
+                } else {
+                  loggingMention.push({
+                    ts: message.ts,
+                    post_at: post_at.format('YYYY/MM/DD'),
+                    channel: channelMessage.channelName,
+                    post_by,
+                    text: message.text,
+                    thread_ts,
+                    toWhom,
+                  })
+                }
+              })
+            }
           }
         })
       }
