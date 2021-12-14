@@ -45,25 +45,16 @@ global.logSlackMessages = async (): Promise<void> => {
 
   await Promise.all(channels.map( async (channel) => {
     const messages = await slack.getSlackMessagesWithin24hours(channel.id)
-    return { channelId: channel.id, channelName: channel.name, messages}
-  })).then(async (channelMessages) => {
-    await Promise.all(channelMessages.map( async (channelMessage, index) => {
-      if(channelMessage.messages.length > 0) {
-        let allReplies = []
-        await Promise.all(channelMessage.messages.map(async (message) => {
-          if(message.reply_count > 0) {
-            const replies = await slack.getAllSlackReplies(channelMessage.channelId, message.ts)
-            replies.shift()
-            allReplies = allReplies.concat(replies)
-          }
-        }))
-        console.log(allReplies)
-        channelMessages[index].messages = channelMessages[index].messages.concat(allReplies)
+    let allReplies = []
+    await Promise.all(messages.map(async (message) => {
+      if(message.reply_count > 0) {
+        const replies = await slack.getAllSlackReplies(channel.id, message.ts)
+        replies.shift() // Because reply array include messages which create its threads
+        allReplies = allReplies.concat(replies)
       }
     }))
-    return channelMessages
-
-  }).then(async (channelMessages) => {
+    return { channelName: channel.name, messages: messages.concat(allReplies)}
+  })).then(async (channelMessages) => {
     await Promise.all(channelMessages.map( async (channelMessage) => {
       if(channelMessage.messages.length > 0) {
         channelMessage.messages.map(async (message) => {
