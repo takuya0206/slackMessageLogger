@@ -15,7 +15,7 @@ export class Slack {
     try {
       while (isNextCursor) {
         const res = UrlFetchApp.fetch(
-          `${this.slackAPIURL}/conversations.list?token=${this.slackToken}&limit=1000&exclude_archived=true&pretty=1${pagination}`
+          `${this.slackAPIURL}/conversations.list?token=${this.slackToken}&limit=200&exclude_archived=true&pretty=1${pagination}`
         );
         const resInParse = JSON.parse(res.getContentText());
         result = result.concat(resInParse.channels);
@@ -39,7 +39,7 @@ export class Slack {
     try {
       while (isNextCursor) {
         const res = UrlFetchApp.fetch(
-          `${this.slackAPIURL}/users.list?token=${this.slackToken}&limit=1000&pretty=1${pagination}`
+          `${this.slackAPIURL}/users.list?token=${this.slackToken}&limit=200&pretty=1${pagination}`
         );
         const resInParse = JSON.parse(res.getContentText());
         result = result.concat(resInParse.members);
@@ -67,7 +67,7 @@ export class Slack {
     try {
       while (isNextCursor) {
         const res = UrlFetchApp.fetch(
-          `${this.slackAPIURL}/conversations.history?token=${this.slackToken}&channel=${channel}&oldest=${yesterday}&limit=1000&pretty=1${pagination}`
+          `${this.slackAPIURL}/conversations.history?token=${this.slackToken}&channel=${channel}&oldest=${yesterday}&limit=200&pretty=1${pagination}`
         );
         const resInParse = JSON.parse(res.getContentText());
         result = result.concat(resInParse.messages);
