@@ -41,12 +41,12 @@ global.logSlackMessages = async (): Promise<void> => {
   const users = await slack.getAllSlackUsers()
   const channels = await slack.getAllSlackChannels()
   const targetDate = dayjs.dayjs().subtract(1, 'day') // assuming that trigger in GAS will set every day
-  const searchOldestDate = targetDate.subtract(2, 'week') // In order to find messages in threads, prepare some buffers. This is for messages in threads which are created on older date than target date
+  const searchOldestDate = targetDate.subtract(10, 'day') // In order to find messages in previous threads, prepare some buffers. This is for messages in threads which are created on older date than target date
   const loggingMessage: loggingMessageProp[] = []
   const loggingMention: loggingMentionProp[] = []
 
   await Promise.all(channels.map( async (channel) => {
-    Utilities.sleep(1500) // Because conversations which has Tier 3 limit can be called 50 times per minute. https://api.slack.com/docs/rate-limits
+    Utilities.sleep(1200) // Because conversations which has Tier 3 limit can be called 50 times per minute. https://api.slack.com/docs/rate-limits
     const messages = await slack.getSlackMessagesFromSpecificDate(channel.id, searchOldestDate)
     let allReplies = []
     await Promise.all(messages.map(async (message) => {
@@ -54,7 +54,7 @@ global.logSlackMessages = async (): Promise<void> => {
       // const post_at = dayjs.dayjs(parseInt(message.ts) * 1000)
       // if(message.reply_count > 0 && dayjs.dayjs('').isAfter(post_at, 'day'))
       if(message.reply_count > 0 ) {
-        Utilities.sleep(1500) // Because conversations which has Tier 3 limit can be called 50 times per minute. https://api.slack.com/docs/rate-limits
+        Utilities.sleep(1200) // Because conversations which has Tier 3 limit can be called 50 times per minute. https://api.slack.com/docs/rate-limits
         const replies = await slack.getAllSlackReplies(channel.id, message.ts)
         replies.shift() // Because reply array include messages which create its threads
         allReplies = allReplies.concat(replies)
@@ -67,7 +67,7 @@ global.logSlackMessages = async (): Promise<void> => {
         channelMessage.messages.map(async (message) => {
           if(!message.subtype && !message.bot_id){
             const post_at = dayjs.dayjs(parseInt(message.ts) * 1000)
-            if(targetDate.isBefore(post_at, 'day') || targetDate.isSame(post_at, 'day')){ // true when targetDate is 2000-01-01 and post_at is 2000-01-02
+            if(targetDate.isSame(post_at, 'day')){ // assuming that trigger in GAS will set every day
               const post_by = await convertUserIdToName(users, message.user)
               const type = message.reply_count ? 'reply' : 'message'
               loggingMessage.push({
