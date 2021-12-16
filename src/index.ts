@@ -108,10 +108,13 @@ global.logSlackMessages = async (): Promise<void> => {
               })
             }
             // save into persistent property
-            updatedPersistentProperty[message.ts] = {
-              ts: message.ts,
-              reply_count: message.reply_count,
-              post_at: post_at.format('YYYY/MM/DD')
+            // Assume that targetDate is yesterday. Slack API includes messages today. But, if persistent property includes today, script doesn't work property tomorrow.
+            if(!dayjs.dayjs().isSame(post_at, 'day')) {
+              updatedPersistentProperty[message.ts] = {
+                ts: message.ts,
+                reply_count: message.reply_count,
+                post_at: post_at.format('YYYY/MM/DD')
+              }
             }
           }
         })
