@@ -1,4 +1,9 @@
-import { getTalkToWhom, convertUserIdToName, convertAryObjToMultiAry } from '../app/util';
+import {
+  getTalkToWhom,
+  convertUserIdToName,
+  convertAryObjToMultiAry,
+  findNewRepliesWithPersistentProperty,
+} from '../app/util';
 jest.unmock('../app/util');
 
 describe('util', () => {
@@ -49,6 +54,34 @@ describe('util', () => {
         ['value3', 'value4'],
       ];
       expect(convertAryObjToMultiAry(parameter)).toStrictEqual(expected);
+    });
+  });
+
+  describe('findNewRepliesWithPersistentProperty()', () => {
+    it('correct parameter', () => {
+      const messages = [
+        { ts: 'test1', reply_count: 1 },
+        { ts: 'test2', reply_count: 3 },
+        { ts: 'test3' },
+        { ts: 'test4' },
+      ];
+      const persistentProperty = {
+        test1: {
+          ts: 'test1',
+          reply_count: 1,
+        },
+        test2: {
+          ts: 'test2',
+          reply_count: 2,
+        },
+        test3: {
+          ts: 'test3',
+        },
+      };
+      // @ts-ignore
+      return findNewRepliesWithPersistentProperty(messages, persistentProperty).then((data) => {
+        expect(data).toStrictEqual([{ ts: 'test2', reply_count: 3 }, { ts: 'test4' }]);
+      });
     });
   });
 });

@@ -17,7 +17,7 @@ By contrast to the message sheet, only messages which mention someone are logged
 
 ### How to Utilize
 The easiest way of analyzing is using pivot table in Google Spreadsheet. However I recommend that you use [Google Data Studio](https://support.google.com/datastudio/answer/6283323?hl=en). You can visualize your data and easily know what is going on in your Slack workspace.
-The following picture is an example for Google Data Studio, which visualizes the number of posts in each channel. 
+The following picture is an example for Google Data Studio, which visualizes the number of posts in each channel.
 
 ![example_dataportal.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/147086/be66373e-87e3-260e-22be-692e32a7df5a.png)
 
@@ -56,7 +56,7 @@ Where you can find Google spreadsheet id? https://developers.google.com/sheets/a
 }
 ```
 #### Store your Slack token in ScriptProperties.
-Firstly, you get Slack token. How to get a Slack token? https://api.slack.com/authentication/basics  
+Firstly, you get Slack token. How to get a Slack token? https://api.slack.com/authentication/basics
 Next, you store the Slack token in your Google Apps Script project by using ScriptProperties. The key must be the same as the one in this repository, i.e. `SLACK_TOKEN`. How to store data? https://developers.google.com/apps-script/guides/properties#saving_data
 
 #### Open src/appsscript.json, change timeZone (optional)
@@ -85,13 +85,20 @@ clasp push
 
 ### Run
 #### Set a time-based trigger
-Set a time-based trigger for the function named as `logSlackMessages`, which should be run everyday. **This software is designed to log messages within 24 hours before**.
+Set a time-based trigger for the function named as `logSlackMessages`, which should be run everyday. **This software is designed to log messages within a day**.
 
 #### Manual way (optional)
 If you want previous logs, change the following code in `src/app/slack.service.ts` and specify how long before you want. Then, manually run `logSlackMessages`.
 ```
 const yesterday = dayjs.dayjs().subtract(1, 'day').unix();
 ```
+
+## FAQ
+### The script has unexpectedly stopped...
+GAS has limitations for Script runtime depending on your Google workspace plan. In order to avoid the limitations, system for persistent property is prepared. Once you run this script, messages are recorded. Thus, runtime will be shortened after the first time.
+
+If you cannot run at the first time, try to run manually. Runtime often shorten more than running by trigger. If it still doesn't work, change the duration to search messages by changing `searchOldestDate` at `index.ts`.
+
 
 ## License
 This software is developed with [gas-clasp-starter](https://github.com/howdy39/gas-clasp-starter) ([Copyright (c) 2018 Tatsuya Nakano](https://github.com/howdy39/gas-clasp-starter/blob/master/LICENSE.txt)) and  released under MIT license.

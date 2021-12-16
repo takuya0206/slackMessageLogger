@@ -45,3 +45,11 @@ export interface loggingMessageProp {
 export interface loggingMentionProp extends loggingMessageProp {
   toWhom: string;
 }
+
+export interface persistentPropertyType {
+  [key: string]: {
+    ts: string;
+    reply_count: number;
+    post_at: string;
+  };
+}

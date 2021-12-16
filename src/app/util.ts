@@ -1,4 +1,4 @@
-import { slackUserProp } from '../types/types';
+import { slackUserProp, slackMessageProp, persistentPropertyType } from '../types/types';
 
 export const getTalkToWhom = (text: string): string[] => {
   const result: string[] = [];
@@ -39,4 +39,30 @@ export const convertAryObjToMultiAry = (AryObj: { [key: string]: any }[]): unkno
     result.push(ary);
   });
   return result;
+};
+
+export const findNewRepliesWithPersistentProperty = async (
+  messages: slackMessageProp[],
+  persistentProperty: persistentPropertyType
+): Promise<slackMessageProp[]> => {
+  const result = [];
+  if (!persistentProperty) {
+    return messages;
+  } else {
+    return await Promise.all(
+      messages.map(async (message) => {
+        const isExisted: boolean = persistentProperty[message.ts] ? true : false;
+        if (isExisted) {
+          if (message.reply_count > persistentProperty[message.ts].reply_count) {
+            result.push(message);
+          }
+        } else {
+          // if it's not existed, it means a new message
+          result.push(message);
+        }
+      })
+    ).then(() => {
+      return result;
+    });
+  }
 };

@@ -26,9 +26,10 @@ SOFTWARE.
 
 import Spreadsheet = GoogleAppsScript.Spreadsheet;
 import { Slack } from './app/slack.service';
-import { convertAryObjToMultiAry, convertUserIdToName, getTalkToWhom } from './app/util'
+import { convertAryObjToMultiAry, convertUserIdToName, getTalkToWhom, findNewRepliesWithPersistentProperty } from './app/util'
 import { Properties } from './model/properties';
-import { loggingMessageProp, loggingMentionProp } from './types/types'
+import { Drive } from './app/drive.service'
+import { loggingMessageProp, loggingMentionProp, persistentPropertyType } from './types/types'
 import { outputSpreadsheetInfo } from './app/constants'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,6 +37,9 @@ declare let global: any;
 
 global.logSlackMessages = async (): Promise<void> => {
   const p = new Properties();
+  const d = new Drive()
+  const updatedPersistentProperty: persistentPropertyType = {}
+  const persistentProperty: persistentPropertyType = await d.readPersistentProperty();
   const ss: Spreadsheet.Spreadsheet = SpreadsheetApp.openById(outputSpreadsheetInfo.id);
   const slack = new Slack(p.getSlackToken())
   const users = await slack.getAllSlackUsers()
@@ -45,11 +49,17 @@ global.logSlackMessages = async (): Promise<void> => {
   const loggingMessage: loggingMessageProp[] = []
   const loggingMention: loggingMentionProp[] = []
 
+  if(!persistentProperty) {
+    d.createPersistentProperty();
+    console.log('Create a new persistent property.');
+  }
+
   await Promise.all(channels.map( async (channel) => {
     Utilities.sleep(1200) // Because conversations which has Tier 3 limit can be called 50 times per minute. https://api.slack.com/docs/rate-limits
     const messages = await slack.getSlackMessagesFromSpecificDate(channel.id, searchOldestDate)
+    const updatedOrNewMessages = await findNewRepliesWithPersistentProperty(messages, persistentProperty)
     let allReplies = []
-    await Promise.all(messages.map(async (message) => {
+    await Promise.all(updatedOrNewMessages.map(async (message) => {
       // In case, need to specify range
       // const post_at = dayjs.dayjs(parseInt(message.ts) * 1000)
       // if(message.reply_count > 0 && dayjs.dayjs('').isAfter(post_at, 'day'))
@@ -97,6 +107,12 @@ global.logSlackMessages = async (): Promise<void> => {
                 }
               })
             }
+            // save into persistent property
+            updatedPersistentProperty[message.ts] = {
+              ts: message.ts,
+              reply_count: message.reply_count,
+              post_at: post_at.format('YYYY/MM/DD')
+            }
           }
         })
       }
@@ -137,5 +153,7 @@ global.logSlackMessages = async (): Promise<void> => {
     } else {
       console.log('There is no mention.')
     }
+
+    d.savePersistentProperty(JSON.stringify(updatedPersistentProperty))
   })
 };
