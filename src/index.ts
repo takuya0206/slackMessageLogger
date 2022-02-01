@@ -26,7 +26,7 @@ SOFTWARE.
 
 import Spreadsheet = GoogleAppsScript.Spreadsheet;
 import { Slack } from './app/slack.service';
-import { convertAryObjToMultiAry, convertUserIdToName, getTalkToWhom, findNewRepliesWithPersistentProperty } from './app/util'
+import { convertAryObjToMultiAry, convertUserIdToUserInfo, getTalkToWhom, findNewRepliesWithPersistentProperty } from './app/util'
 import { Properties } from './model/properties';
 import { Drive } from './app/drive.service'
 import { loggingMessageProp, loggingMentionProp, persistentPropertyType } from './types/types'
@@ -78,20 +78,20 @@ global.logSlackMessages = async (): Promise<void> => {
           if(!message.subtype && !message.bot_id){
             const post_at = dayjs.dayjs(parseInt(message.ts) * 1000)
             if(targetDate.isSame(post_at, 'day')){ // assuming that trigger in GAS will set every day
-              const post_by = await convertUserIdToName(users, message.user)
+              const post_by = await convertUserIdToUserInfo(users, message.user)
               const type = message.reply_count ? 'reply' : 'message'
               loggingMessage.push({
                 ts: message.ts,
                 post_at: post_at.format('YYYY/MM/DD'),
                 channel: channelMessage.channelName,
-                post_by,
+                post_by: post_by ? post_by.email : null,
                 text: message.text,
                 type,
               })
               // log messages with each user whom someone mentions
               const talkToWhoms = getTalkToWhom(message.text)
               talkToWhoms.map( async (talkToWhom) => {
-                const toWhom = await convertUserIdToName(users, talkToWhom)
+                const toWhom = await convertUserIdToUserInfo(users, talkToWhom)
                 if(!toWhom){
                   console.log(`Error: ${talkToWhom} doesn't exist in our user list.`)
                 } else {
@@ -99,10 +99,10 @@ global.logSlackMessages = async (): Promise<void> => {
                     ts: message.ts,
                     post_at: post_at.format('YYYY/MM/DD'),
                     channel: channelMessage.channelName,
-                    post_by,
+                    post_by: post_by ? post_by.email : null,
                     text: message.text,
                     type,
-                    toWhom,
+                    toWhom: toWhom ? toWhom.email : null
                   })
                 }
               })

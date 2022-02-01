@@ -13,17 +13,20 @@ export const getTalkToWhom = (text: string): string[] => {
   }
 };
 
-export const convertUserIdToName = async (
+export const convertUserIdToUserInfo = async (
   users: slackUserProp[],
   userId: string
-): Promise<string | null> => {
-  let name = null;
+): Promise<{name: string; email: string; } | null> => {
+  let result = null
   users.forEach(async (user) => {
     if (user.id === userId) {
-      name = user.profile.real_name;
+      result = {
+        name: user.profile.real_name,
+        email: user.profile.email
+      }
     }
   });
-  return name;
+  return result;
 };
 
 // convert [{}, {}]  to [[], []]

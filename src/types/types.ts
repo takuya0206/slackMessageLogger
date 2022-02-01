@@ -10,6 +10,7 @@ export interface slackUserProp {
   profile: {
     real_name: string;
     display_name: string;
+    email: string;
   };
 }
 
