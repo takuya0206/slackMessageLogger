@@ -1,6 +1,6 @@
 import {
   getTalkToWhom,
-  convertUserIdToName,
+  convertUserIdToUserInfo,
   convertAryObjToMultiAry,
   findNewRepliesWithPersistentProperty,
 } from '../app/util';
@@ -27,17 +27,18 @@ describe('util', () => {
         profile: {
           real_name: 'test',
           display_name: 'test',
+          email: 'test',
         },
       },
     ];
     it('no match', async () => {
-      return convertUserIdToName(parameter, 'no match').then((data) =>
+      return convertUserIdToUserInfo(parameter, 'no match').then((data) =>
         expect(data).toStrictEqual(null)
       );
     });
     it('match', async () => {
-      return convertUserIdToName(parameter, 'test').then((data) =>
-        expect(data).toStrictEqual('test')
+      return convertUserIdToUserInfo(parameter, 'test').then((data) =>
+        expect(data).toStrictEqual({ name: 'test', email: 'test' })
       );
     });
   });

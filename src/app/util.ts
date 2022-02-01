@@ -16,14 +16,14 @@ export const getTalkToWhom = (text: string): string[] => {
 export const convertUserIdToUserInfo = async (
   users: slackUserProp[],
   userId: string
-): Promise<{name: string; email: string; } | null> => {
-  let result = null
+): Promise<{ name: string; email: string } | null> => {
+  let result = null;
   users.forEach(async (user) => {
     if (user.id === userId) {
       result = {
         name: user.profile.real_name,
-        email: user.profile.email
-      }
+        email: user.profile.email,
+      };
     }
   });
   return result;
